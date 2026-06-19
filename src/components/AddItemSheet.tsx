@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Minus, Plus, Scan, X } from 'lucide-react'
 import { lookupBarcode } from '../lib/barcodeApi'
 import BarcodeScanner from './BarcodeScanner'
