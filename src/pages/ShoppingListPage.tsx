@@ -2,7 +2,9 @@ import { useEffect, useState, useCallback } from 'react'
 import { ShoppingCart, Trash2, RefreshCw } from 'lucide-react'
 import { supabase, CATEGORIES, type ShoppingSuggestion } from '../lib/supabase'
 
-export default function ShoppingListPage() {
+type Props = { householdId: string }
+
+export default function ShoppingListPage({ householdId }: Props) {
   const [suggestions, setSuggestions] = useState<ShoppingSuggestion[]>([])
   const [loading, setLoading] = useState(true)
   const [syncing, setSyncing] = useState(false)
@@ -12,6 +14,7 @@ export default function ShoppingListPage() {
     const { data } = await supabase
       .from('shopping_suggestions')
       .select('*')
+      .eq('household_id', householdId)
       .order('created_at', { ascending: false })
     setSuggestions(data ?? [])
     setLoading(false)
@@ -27,6 +30,7 @@ export default function ShoppingListPage() {
     const { data: items } = await supabase
       .from('pantry_items')
       .select('*')
+      .eq('household_id', householdId)
       .not('expiration_date', 'is', null)
 
     if (items) {
@@ -52,6 +56,7 @@ export default function ShoppingListPage() {
         if (!existing || existing.length === 0) {
           await supabase.from('shopping_suggestions').insert({
             user_id: user.id,
+            household_id: householdId,
             name: item.name,
             category: item.category,
             last_price: item.price,
@@ -71,9 +76,7 @@ export default function ShoppingListPage() {
   }
 
   async function dismissAll() {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-    await supabase.from('shopping_suggestions').delete().eq('user_id', user.id)
+    await supabase.from('shopping_suggestions').delete().eq('household_id', householdId)
     setSuggestions([])
   }
 

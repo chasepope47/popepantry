@@ -6,10 +6,11 @@ import DeleteConfirmModal from '../components/DeleteConfirmModal'
 import { getExpirationStatus, formatExpirationLabel, expirationBadgeClasses } from '../lib/expiration'
 
 type Props = {
+  householdId: string
   onNavigateToShopping: () => void
 }
 
-export default function PantryPage({ onNavigateToShopping }: Props) {
+export default function PantryPage({ householdId, onNavigateToShopping }: Props) {
   const [items, setItems] = useState<PantryItem[]>([])
   const [loading, setLoading] = useState(true)
   const [showAdd, setShowAdd] = useState(false)
@@ -21,17 +22,18 @@ export default function PantryPage({ onNavigateToShopping }: Props) {
     const { data } = await supabase
       .from('pantry_items')
       .select('*')
+      .eq('household_id', householdId)
       .order('expiration_date', { ascending: true, nullsFirst: false })
     setItems(data ?? [])
     setLoading(false)
-  }, [])
+  }, [householdId])
 
   useEffect(() => { fetchItems() }, [fetchItems])
 
   async function addItem(item: Omit<PantryItem, 'id' | 'user_id' | 'created_at'>) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
-    await supabase.from('pantry_items').insert({ ...item, user_id: user.id })
+    await supabase.from('pantry_items').insert({ ...item, user_id: user.id, household_id: householdId })
     await fetchItems()
   }
 
@@ -41,6 +43,7 @@ export default function PantryPage({ onNavigateToShopping }: Props) {
       if (user) {
         const suggestion: Omit<ShoppingSuggestion, 'id' | 'created_at'> = {
           user_id: user.id,
+          household_id: householdId,
           name: item.name,
           category: item.category,
           last_price: item.price,
