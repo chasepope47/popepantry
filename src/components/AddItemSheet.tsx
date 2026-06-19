@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { Minus, Plus, Scan, X } from 'lucide-react'
+import { Minus, Plus, Scan, X, ChevronDown } from 'lucide-react'
 import { lookupBarcode } from '../lib/barcodeApi'
 import BarcodeScanner from './BarcodeScanner'
-import type { PantryItem } from '../lib/supabase'
+import { CATEGORIES, type PantryItem, type Category } from '../lib/supabase'
 
 type Props = {
   onAdd: (item: Omit<PantryItem, 'id' | 'user_id' | 'created_at'>) => Promise<void>
@@ -15,6 +15,8 @@ export default function AddItemSheet({ onAdd, onClose }: Props) {
   const [name, setName] = useState('')
   const [quantity, setQuantity] = useState(1)
   const [price, setPrice] = useState('')
+  const [category, setCategory] = useState<Category>('Other')
+  const [expirationDate, setExpirationDate] = useState('')
   const [loading, setLoading] = useState(false)
   const [looking, setLooking] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -37,7 +39,14 @@ export default function AddItemSheet({ onAdd, onClose }: Props) {
     if (isNaN(parsedPrice) || parsedPrice < 0) { setError('Please enter a valid price.'); return }
     setError(null)
     setLoading(true)
-    await onAdd({ barcode, name: name.trim(), quantity, price: parsedPrice })
+    await onAdd({
+      barcode,
+      name: name.trim(),
+      quantity,
+      price: parsedPrice,
+      category,
+      expiration_date: expirationDate || null,
+    })
     setLoading(false)
     onClose()
   }
@@ -49,7 +58,7 @@ export default function AddItemSheet({ onAdd, onClose }: Props) {
   return (
     <div className="fixed inset-0 z-40 flex flex-col justify-end bg-black/40" onClick={onClose}>
       <div
-        className="bg-white rounded-t-3xl w-full max-w-lg mx-auto shadow-xl"
+        className="bg-white rounded-t-3xl w-full max-w-lg mx-auto shadow-xl overflow-y-auto max-h-[92dvh]"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-6 pt-5 pb-2">
@@ -86,6 +95,38 @@ export default function AddItemSheet({ onAdd, onClose }: Props) {
               onChange={e => setName(e.target.value)}
               placeholder="e.g. Organic Pasta"
               className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400"
+            />
+          </div>
+
+          {/* Category */}
+          <div>
+            <label className="block text-sm font-medium text-stone-700 mb-1">Category</label>
+            <div className="relative">
+              <select
+                value={category}
+                onChange={e => setCategory(e.target.value as Category)}
+                className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-900 appearance-none focus:outline-none focus:ring-2 focus:ring-amber-400"
+              >
+                {CATEGORIES.map(c => (
+                  <option key={c.label} value={c.label}>
+                    {c.emoji} {c.label}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none" />
+            </div>
+          </div>
+
+          {/* Expiration Date */}
+          <div>
+            <label className="block text-sm font-medium text-stone-700 mb-1">
+              Expiration Date <span className="text-stone-400 font-normal">(optional)</span>
+            </label>
+            <input
+              type="date"
+              value={expirationDate}
+              onChange={e => setExpirationDate(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-400"
             />
           </div>
 

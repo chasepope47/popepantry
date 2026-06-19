@@ -9,6 +9,22 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
+export const CATEGORIES = [
+  { label: 'Produce', emoji: '🥦' },
+  { label: 'Dairy', emoji: '🥛' },
+  { label: 'Meat & Seafood', emoji: '🥩' },
+  { label: 'Frozen', emoji: '❄️' },
+  { label: 'Canned & Jarred', emoji: '🥫' },
+  { label: 'Grains & Pasta', emoji: '🌾' },
+  { label: 'Snacks', emoji: '🍿' },
+  { label: 'Beverages', emoji: '🥤' },
+  { label: 'Condiments', emoji: '🍯' },
+  { label: 'Baking', emoji: '🧁' },
+  { label: 'Other', emoji: '📦' },
+] as const
+
+export type Category = typeof CATEGORIES[number]['label']
+
 export type PantryItem = {
   id: string
   user_id: string
@@ -16,5 +32,17 @@ export type PantryItem = {
   name: string
   quantity: number
   price: number
+  category: Category
+  expiration_date: string | null
+  created_at: string
+}
+
+export type ShoppingSuggestion = {
+  id: string
+  user_id: string
+  name: string
+  category: Category | null
+  last_price: number | null
+  reason: 'expiring_soon' | 'used_up'
   created_at: string
 }
