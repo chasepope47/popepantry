@@ -5,7 +5,7 @@ import BarcodeScanner from './BarcodeScanner'
 import { CATEGORIES, type PantryItem, type Category } from '../lib/supabase'
 
 type Props = {
-  onAdd: (item: Omit<PantryItem, 'id' | 'user_id' | 'created_at'>) => Promise<void>
+  onAdd: (item: Omit<PantryItem, 'id' | 'user_id' | 'household_id' | 'created_at'>) => Promise<void>
   onClose: () => void
 }
 
