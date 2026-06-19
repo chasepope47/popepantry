@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { Plus, LogOut, Search, Package } from 'lucide-react'
-import { supabase, CATEGORIES, type PantryItem, type ShoppingSuggestion, type Category } from '../lib/supabase'
+import { supabase, CATEGORIES, type PantryItem, type ShoppingSuggestion } from '../lib/supabase'
 import AddItemSheet from '../components/AddItemSheet'
 import DeleteConfirmModal from '../components/DeleteConfirmModal'
 import { getExpirationStatus, formatExpirationLabel, expirationBadgeClasses } from '../lib/expiration'
