@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { Html5Qrcode } from 'html5-qrcode'
+import { BrowserMultiFormatReader } from '@zxing/browser'
+import type { IScannerControls } from '@zxing/browser'
 import { X } from 'lucide-react'
 
 type Props = {
@@ -7,40 +8,51 @@ type Props = {
   onClose: () => void
 }
 
-const CONTAINER_ID = 'barcode-scanner-container'
-
 export default function BarcodeScanner({ onScan, onClose }: Props) {
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const controlsRef = useRef<IScannerControls | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [cameraReady, setCameraReady] = useState(false)
-  const [found, setFound] = useState(false)
+  const [ready, setReady] = useState(false)
   const onScanRef = useRef(onScan)
   onScanRef.current = onScan
 
-  useEffect(() => {
-    let destroyed = false
-    const scanner = new Html5Qrcode(CONTAINER_ID)
+  function stopCamera() {
+    try {
+      controlsRef.current?.stop()
+    } catch { /* ignore */ }
+    // Explicitly kill all tracks so iOS releases the camera layer
+    if (videoRef.current?.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream
+      stream.getTracks().forEach(t => t.stop())
+      videoRef.current.srcObject = null
+    }
+  }
 
-    scanner
-      .start(
-        { facingMode: 'environment' },
-        { fps: 15, qrbox: { width: 280, height: 120 }, aspectRatio: 1.7778 },
-        (code) => {
-          if (destroyed) return
-          destroyed = true
-          setFound(true)
-          scanner.stop().catch(() => {})
-          // Wait for the success screen to render before transitioning
-          // This prevents touch events from the scan from hitting the form backdrop
-          setTimeout(() => onScanRef.current(code), 400)
-        },
-        () => {}
+  useEffect(() => {
+    const reader = new BrowserMultiFormatReader()
+    let done = false
+
+    reader
+      .decodeFromConstraints(
+        { video: { facingMode: { ideal: 'environment' } } },
+        videoRef.current!,
+        (result, err) => {
+          if (done || !result) return
+          if (err) return // per-frame errors are normal — ignore
+          done = true
+          stopCamera()
+          onScanRef.current(result.getText())
+        }
       )
-      .then(() => { if (!destroyed) setCameraReady(true) })
+      .then(controls => {
+        controlsRef.current = controls
+        if (!done) setReady(true)
+      })
       .catch((err: unknown) => {
         const msg = String(err).toLowerCase()
         if (msg.includes('permission') || msg.includes('notallowed')) {
-          setError('Camera permission denied. Tap the camera icon in your browser address bar and allow access, then try again.')
-        } else if (msg.includes('notfound') || msg.includes('no camera')) {
+          setError('Camera permission denied. Allow camera access in your browser settings and try again.')
+        } else if (msg.includes('notfound') || msg.includes('devicenotfound')) {
           setError('No camera found on this device.')
         } else {
           setError('Could not start the camera. Try refreshing the page.')
@@ -48,25 +60,10 @@ export default function BarcodeScanner({ onScan, onClose }: Props) {
       })
 
     return () => {
-      destroyed = true
-      scanner.stop().catch(() => {})
+      done = true
+      stopCamera()
     }
   }, [])
-
-  // Success screen — shown briefly after scan before transitioning to form
-  if (found) {
-    return (
-      <div className="fixed inset-0 z-50 bg-black flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-20 h-20 rounded-full bg-green-500 flex items-center justify-center mx-auto mb-4">
-            <span className="text-4xl">✓</span>
-          </div>
-          <p className="text-white font-semibold text-lg">Barcode found!</p>
-          <p className="text-white/50 text-sm mt-1">Looking up product…</p>
-        </div>
-      </div>
-    )
-  }
 
   if (error) {
     return (
@@ -81,10 +78,7 @@ export default function BarcodeScanner({ onScan, onClose }: Props) {
           <div>
             <div className="text-5xl mb-4">📷</div>
             <p className="text-white/80 text-sm leading-relaxed">{error}</p>
-            <button
-              onClick={onClose}
-              className="mt-6 px-6 py-3 bg-amber-500 rounded-xl text-white font-medium"
-            >
+            <button onClick={onClose} className="mt-6 px-6 py-3 bg-amber-500 rounded-xl text-white font-medium">
               Go Back
             </button>
           </div>
@@ -101,16 +95,29 @@ export default function BarcodeScanner({ onScan, onClose }: Props) {
           <X size={24} />
         </button>
       </div>
-      <div className="flex-1 flex flex-col items-center justify-center relative">
-        <div id={CONTAINER_ID} className="w-full max-w-sm overflow-hidden rounded-xl" />
-        {cameraReady && (
+
+      <div className="flex-1 flex flex-col items-center justify-center relative overflow-hidden">
+        {/* The video element we fully control */}
+        <video
+          ref={videoRef}
+          className="w-full h-full object-cover"
+          playsInline
+          muted
+          autoPlay
+        />
+
+        {/* Aim guide */}
+        {ready && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="border-2 border-amber-400 rounded-lg w-72 h-28 opacity-70" />
+            <div className="border-2 border-amber-400 rounded-lg w-72 h-28 opacity-80 shadow-lg" />
           </div>
         )}
-        <p className="text-white/60 text-sm mt-8 px-8 text-center">
-          Line up the barcode inside the box
-        </p>
+
+        <div className="absolute bottom-12 left-0 right-0 text-center pointer-events-none">
+          <p className="text-white/70 text-sm px-8">
+            {ready ? 'Line up the barcode inside the box' : 'Starting camera…'}
+          </p>
+        </div>
       </div>
     </div>
   )
