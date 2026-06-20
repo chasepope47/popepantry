@@ -12,19 +12,24 @@ type Props = {
 
 export default function PantryPage({ householdId, onNavigateToShopping }: Props) {
   const [items, setItems] = useState<PantryItem[]>([])
+  const [householdName, setHouseholdName] = useState('My Pantry')
   const [loading, setLoading] = useState(true)
   const [showAdd, setShowAdd] = useState(false)
-  const [search, setSearch] = useState(''  )
+  const [search, setSearch] = useState('')
   const [pendingDelete, setPendingDelete] = useState<PantryItem | null>(null)
 
   const fetchItems = useCallback(async () => {
     setLoading(true)
-    const { data } = await supabase
-      .from('pantry_items')
-      .select('*')
-      .eq('household_id', householdId)
-      .order('expiration_date', { ascending: true, nullsFirst: false })
-    setItems(data ?? [])
+    const [{ data: itemData }, { data: hh }] = await Promise.all([
+      supabase
+        .from('pantry_items')
+        .select('*')
+        .eq('household_id', householdId)
+        .order('expiration_date', { ascending: true, nullsFirst: false }),
+      supabase.from('households').select('name').eq('id', householdId).single(),
+    ])
+    setItems(itemData ?? [])
+    if (hh?.name) setHouseholdName(hh.name)
     setLoading(false)
   }, [householdId])
 
@@ -90,7 +95,7 @@ export default function PantryPage({ householdId, onNavigateToShopping }: Props)
       <header className="bg-white border-b border-stone-200 px-4 py-4 flex items-center justify-between sticky top-0 z-10">
         <div className="flex items-center gap-2">
           <span className="text-2xl">🥫</span>
-          <h1 className="text-xl font-bold text-stone-900">Pope Pantry</h1>
+          <h1 className="text-xl font-bold text-stone-900">{householdName}</h1>
         </div>
         <button
           onClick={handleSignOut}

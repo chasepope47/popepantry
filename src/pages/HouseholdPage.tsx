@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { Copy, Check, LogOut, Users, UserPlus, Hash } from 'lucide-react'
+import { Copy, Check, LogOut, Users, UserPlus, Hash, Pencil } from 'lucide-react'
 import { supabase, type HouseholdMember, type Household } from '../lib/supabase'
 import { createInviteCode, joinByCode, type JoinResult } from '../lib/household'
 
@@ -12,6 +12,9 @@ export default function HouseholdPage({ householdId, onHouseholdChanged }: Props
   const [household, setHousehold] = useState<Household | null>(null)
   const [members, setMembers] = useState<HouseholdMember[]>([])
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+  const [editingName, setEditingName] = useState(false)
+  const [nameInput, setNameInput] = useState('')
+  const [savingName, setSavingName] = useState(false)
   const [inviteCode, setInviteCode] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
   const [joinCode, setJoinCode] = useState('')
@@ -31,6 +34,15 @@ export default function HouseholdPage({ householdId, onHouseholdChanged }: Props
   }, [householdId])
 
   useEffect(() => { load() }, [load])
+
+  async function saveName() {
+    if (!nameInput.trim() || !household) return
+    setSavingName(true)
+    await supabase.from('households').update({ name: nameInput.trim() }).eq('id', householdId)
+    setHousehold({ ...household, name: nameInput.trim() })
+    setEditingName(false)
+    setSavingName(false)
+  }
 
   async function handleGenerateCode() {
     setGeneratingCode(true)
@@ -81,19 +93,50 @@ export default function HouseholdPage({ householdId, onHouseholdChanged }: Props
 
   return (
     <div className="flex flex-col bg-[#f8f5f0] min-h-dvh">
-      <header className="bg-white border-b border-stone-200 px-4 py-4 flex items-center justify-between sticky top-0 z-10">
-        <div className="flex items-center gap-2">
-          <span className="text-2xl">🏠</span>
-          <h1 className="text-xl font-bold text-stone-900">
-            {household?.name ?? 'My Home'}
-          </h1>
+      <header className="bg-white border-b border-stone-200 px-4 py-4 sticky top-0 z-10">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <span className="text-2xl flex-shrink-0">🏠</span>
+            {editingName ? (
+              <div className="flex items-center gap-2 flex-1">
+                <input
+                  autoFocus
+                  value={nameInput}
+                  onChange={e => setNameInput(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') saveName(); if (e.key === 'Escape') setEditingName(false) }}
+                  className="flex-1 text-xl font-bold text-stone-900 bg-stone-100 rounded-lg px-2 py-0.5 focus:outline-none focus:ring-2 focus:ring-amber-400"
+                />
+                <button
+                  onClick={saveName}
+                  disabled={savingName}
+                  className="text-xs px-3 py-1.5 rounded-lg bg-amber-500 text-white font-semibold disabled:opacity-50"
+                >
+                  {savingName ? '…' : 'Save'}
+                </button>
+                <button onClick={() => setEditingName(false)} className="text-xs px-2 py-1.5 rounded-lg bg-stone-100 text-stone-600">
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <h1 className="text-xl font-bold text-stone-900 truncate">
+                  {household?.name ?? 'My Home'}
+                </h1>
+                <button
+                  onClick={() => { setNameInput(household?.name ?? ''); setEditingName(true) }}
+                  className="p-1 rounded-lg text-stone-400 hover:text-stone-600 hover:bg-stone-100 transition-colors flex-shrink-0"
+                >
+                  <Pencil size={15} />
+                </button>
+              </div>
+            )}
+          </div>
+          {!editingName && (
+            <button onClick={handleSignOut} className="p-2 rounded-xl hover:bg-stone-100 text-stone-500 transition-colors flex-shrink-0">
+              <LogOut size={20} />
+            </button>
+          )}
         </div>
-        <button
-          onClick={handleSignOut}
-          className="p-2 rounded-xl hover:bg-stone-100 text-stone-500 transition-colors"
-        >
-          <LogOut size={20} />
-        </button>
       </header>
 
       <main className="flex-1 px-4 py-5 max-w-lg mx-auto w-full pb-32 space-y-4">

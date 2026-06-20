@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { BrowserMultiFormatReader } from '@zxing/browser'
 import type { IScannerControls } from '@zxing/browser'
+import { DecodeHintType, BarcodeFormat } from '@zxing/library'
 import { X } from 'lucide-react'
 
 type Props = {
@@ -29,7 +30,18 @@ export default function BarcodeScanner({ onScan, onClose }: Props) {
   }
 
   useEffect(() => {
-    const reader = new BrowserMultiFormatReader()
+    const hints = new Map<DecodeHintType, unknown>()
+    hints.set(DecodeHintType.TRY_HARDER, true)
+    hints.set(DecodeHintType.POSSIBLE_FORMATS, [
+      BarcodeFormat.EAN_13,
+      BarcodeFormat.EAN_8,
+      BarcodeFormat.UPC_A,
+      BarcodeFormat.UPC_E,
+      BarcodeFormat.CODE_128,
+      BarcodeFormat.CODE_39,
+      BarcodeFormat.QR_CODE,
+    ])
+    const reader = new BrowserMultiFormatReader(hints)
     let done = false
 
     reader
