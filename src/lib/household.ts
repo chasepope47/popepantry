@@ -33,7 +33,7 @@ export async function ensureHousehold(userId: string, email: string): Promise<st
     .select()
     .single()
 
-  if (error || !household) throw new Error('Failed to create household')
+  if (error || !household) throw new Error(error?.message ?? 'Failed to create household')
 
   await supabase.from('household_members').insert({
     household_id: household.id,
