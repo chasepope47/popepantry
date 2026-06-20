@@ -51,15 +51,14 @@ export default function AddItemSheet({ onAdd, onClose }: Props) {
     onClose()
   }
 
-  if (scanning) {
-    return <BarcodeScanner onScan={handleScan} onClose={() => setScanning(false)} />
-  }
-
   return (
-    <div className="fixed inset-0 z-40 flex flex-col justify-end bg-black/40" onClick={onClose}>
+    <>
+    {/* Scanner sits on top — form stays mounted the whole time */}
+    {scanning && <BarcodeScanner onScan={handleScan} onClose={() => setScanning(false)} />}
+
+    <div className="fixed inset-0 z-40 flex flex-col justify-end bg-black/40">
       <div
         className="bg-white rounded-t-3xl w-full max-w-lg mx-auto shadow-xl overflow-y-auto max-h-[92dvh]"
-        onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-6 pt-5 pb-2">
           <h2 className="text-lg font-bold text-stone-900">Add Item</h2>
@@ -191,5 +190,6 @@ export default function AddItemSheet({ onAdd, onClose }: Props) {
         </form>
       </div>
     </div>
+    </>
   )
 }
