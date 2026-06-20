@@ -1,19 +1,20 @@
-import { useState } from 'react'
-import { Minus, Plus, Scan, ChevronDown, ArrowLeft } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Minus, Plus, Scan, ChevronDown, ArrowLeft, X } from 'lucide-react'
+import { supabase, CATEGORIES, type PantryItem, type Category } from '../lib/supabase'
 import { lookupBarcode } from '../lib/barcodeApi'
 import BarcodeScanner from './BarcodeScanner'
-import { CATEGORIES, type PantryItem, type Category } from '../lib/supabase'
 
 type ItemFields = Omit<PantryItem, 'id' | 'user_id' | 'household_id' | 'created_at'>
 
 type Props = {
   initialValues?: Partial<ItemFields>
   mode?: 'add' | 'edit'
+  householdId: string
   onSave: (item: ItemFields) => Promise<void>
   onClose: () => void
 }
 
-export default function AddItemSheet({ initialValues, mode = 'add', onSave, onClose }: Props) {
+export default function AddItemSheet({ initialValues, mode = 'add', householdId, onSave, onClose }: Props) {
   const [scanning, setScanning] = useState(false)
   const [barcode, setBarcode] = useState<string | null>(initialValues?.barcode ?? null)
   const [name, setName] = useState(initialValues?.name ?? '')
@@ -25,6 +26,26 @@ export default function AddItemSheet({ initialValues, mode = 'add', onSave, onCl
   const [loading, setLoading] = useState(false)
   const [looking, setLooking] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const [savedStores, setSavedStores] = useState<string[]>([])
+  const [addingNewStore, setAddingNewStore] = useState(false)
+
+  useEffect(() => {
+    supabase
+      .from('pantry_items')
+      .select('store')
+      .eq('household_id', householdId)
+      .not('store', 'is', null)
+      .then(({ data }) => {
+        const unique = [...new Set((data ?? []).map(i => i.store).filter(Boolean))] as string[]
+        unique.sort((a, b) => a.localeCompare(b))
+        setSavedStores(unique)
+        // If editing with a store not in the list, go straight to text input
+        if (initialValues?.store && !unique.includes(initialValues.store)) {
+          setAddingNewStore(true)
+        }
+      })
+  }, [householdId, initialValues?.store])
 
   async function handleScan(code: string) {
     setScanning(false)
@@ -60,6 +81,8 @@ export default function AddItemSheet({ initialValues, mode = 'add', onSave, onCl
   if (scanning) {
     return <BarcodeScanner onScan={handleScan} onClose={() => setScanning(false)} />
   }
+
+  const showDropdown = savedStores.length > 0 && !addingNewStore
 
   return (
     <div className="fixed inset-0 z-40 bg-[#f8f5f0] dark:bg-stone-950 flex flex-col">
@@ -118,17 +141,55 @@ export default function AddItemSheet({ initialValues, mode = 'add', onSave, onCl
               </div>
             </div>
 
+            {/* Store — dropdown if saved stores exist, otherwise plain text input */}
             <div>
               <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
                 Store <span className="text-stone-400 dark:text-stone-500 font-normal">(optional)</span>
               </label>
-              <input
-                type="text"
-                value={store}
-                onChange={e => setStore(e.target.value)}
-                placeholder="e.g. Walmart, Costco, Target…"
-                className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400"
-              />
+
+              {showDropdown ? (
+                <div className="relative">
+                  <select
+                    value={store}
+                    onChange={e => {
+                      if (e.target.value === '__new__') {
+                        setAddingNewStore(true)
+                        setStore('')
+                      } else {
+                        setStore(e.target.value)
+                      }
+                    }}
+                    className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 appearance-none focus:outline-none focus:ring-2 focus:ring-amber-400"
+                  >
+                    <option value="">No store</option>
+                    {savedStores.map(s => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                    <option value="__new__">＋ Add new store…</option>
+                  </select>
+                  <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none" />
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={store}
+                    onChange={e => setStore(e.target.value)}
+                    placeholder="e.g. Walmart, Costco, Target…"
+                    className="flex-1 px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400"
+                  />
+                  {savedStores.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => { setAddingNewStore(false); setStore('') }}
+                      className="p-3 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 transition-colors"
+                      title="Back to store list"
+                    >
+                      <X size={18} />
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
 
             <div>

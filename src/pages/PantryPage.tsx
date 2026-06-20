@@ -242,12 +242,13 @@ export default function PantryPage({ householdId, onNavigateToShopping }: Props)
       </button>
 
       {showAdd && (
-        <AddItemSheet mode="add" onSave={addItem} onClose={() => setShowAdd(false)} />
+        <AddItemSheet mode="add" householdId={householdId} onSave={addItem} onClose={() => setShowAdd(false)} />
       )}
 
       {editingItem && (
         <AddItemSheet
           mode="edit"
+          householdId={householdId}
           initialValues={editingItem}
           onSave={updateItem}
           onClose={() => setEditingItem(null)}
