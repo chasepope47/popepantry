@@ -92,6 +92,8 @@ export default function App() {
           <HouseholdPage
             householdId={householdId!}
             onHouseholdChanged={newId => { setHouseholdId(newId); setTab('pantry') }}
+            dark={dark}
+            onToggleDark={toggleDark}
           />
         )}
       </div>
@@ -109,14 +111,6 @@ export default function App() {
             <span className="text-[10px] font-medium">{t.label}</span>
           </button>
         ))}
-        <button
-          onClick={toggleDark}
-          className="flex flex-col items-center gap-1 py-2.5 px-4 text-stone-400 dark:text-stone-500 transition-colors"
-          aria-label="Toggle dark mode"
-        >
-          <span className="text-xl">{dark ? '☀️' : '🌙'}</span>
-          <span className="text-[10px] font-medium">{dark ? 'Light' : 'Dark'}</span>
-        </button>
       </nav>
     </div>
   )

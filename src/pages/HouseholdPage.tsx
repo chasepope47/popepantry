@@ -6,9 +6,11 @@ import { createInviteCode, joinByCode, type JoinResult } from '../lib/household'
 type Props = {
   householdId: string
   onHouseholdChanged: (newId: string) => void
+  dark: boolean
+  onToggleDark: () => void
 }
 
-export default function HouseholdPage({ householdId, onHouseholdChanged }: Props) {
+export default function HouseholdPage({ householdId, onHouseholdChanged, dark, onToggleDark }: Props) {
   const [household, setHousehold] = useState<Household | null>(null)
   const [members, setMembers] = useState<HouseholdMember[]>([])
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
@@ -235,6 +237,27 @@ export default function HouseholdPage({ householdId, onHouseholdChanged }: Props
               </button>
             </div>
           )}
+        </section>
+
+        {/* Appearance */}
+        <section className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden">
+          <div className="flex items-center gap-2 px-4 py-3 border-b border-stone-100 dark:border-stone-800">
+            <span className="text-stone-400 dark:text-stone-500 text-base">🎨</span>
+            <span className="text-sm font-semibold text-stone-700 dark:text-stone-300">Appearance</span>
+          </div>
+          <div className="flex items-center justify-between px-4 py-3">
+            <div>
+              <p className="text-sm font-medium text-stone-900 dark:text-stone-100">Dark Mode</p>
+              <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">{dark ? 'On' : 'Off'}</p>
+            </div>
+            <button
+              onClick={onToggleDark}
+              className={`relative w-12 h-6 rounded-full transition-colors ${dark ? 'bg-amber-500' : 'bg-stone-200 dark:bg-stone-700'}`}
+              aria-label="Toggle dark mode"
+            >
+              <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${dark ? 'translate-x-6' : 'translate-x-0'}`} />
+            </button>
+          </div>
         </section>
 
       </main>
