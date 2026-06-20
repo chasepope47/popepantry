@@ -34,7 +34,8 @@ export default function BarcodeScanner({ onScan, onClose }: Props) {
         (code) => {
           if (destroyed) return
           destroyed = true
-          scanner.stop().catch(() => {}).finally(() => onScanRef.current(code))
+          onScanRef.current(code) // call immediately so the UI transitions right away
+          scanner.stop().catch(() => {})
         },
         () => {} // suppress per-frame decode errors
       )
