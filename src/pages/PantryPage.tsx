@@ -30,7 +30,7 @@ export default function PantryPage({ householdId, onNavigateToShopping }: Props)
 
   useEffect(() => { fetchItems() }, [fetchItems])
 
-  async function addItem(item: Omit<PantryItem, 'id' | 'user_id' | 'created_at'>) {
+  async function addItem(item: Omit<PantryItem, 'id' | 'user_id' | 'household_id' | 'created_at'>) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
     await supabase.from('pantry_items').insert({ ...item, user_id: user.id, household_id: householdId })
