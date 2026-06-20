@@ -29,6 +29,7 @@ export default function AddItemSheet({ initialValues, mode = 'add', householdId,
 
   const [savedStores, setSavedStores] = useState<string[]>([])
   const [addingNewStore, setAddingNewStore] = useState(false)
+  const [editingStores, setEditingStores] = useState(false)
 
   useEffect(() => {
     supabase
@@ -46,6 +47,16 @@ export default function AddItemSheet({ initialValues, mode = 'add', householdId,
         }
       })
   }, [householdId, initialValues?.store])
+
+  async function deleteStore(storeName: string) {
+    await supabase
+      .from('pantry_items')
+      .update({ store: null })
+      .eq('household_id', householdId)
+      .eq('store', storeName)
+    setSavedStores(prev => prev.filter(s => s !== storeName))
+    if (store === storeName) setStore('')
+  }
 
   async function handleScan(code: string) {
     setScanning(false)
@@ -148,26 +159,55 @@ export default function AddItemSheet({ initialValues, mode = 'add', householdId,
               </label>
 
               {showDropdown ? (
-                <div className="relative">
-                  <select
-                    value={store}
-                    onChange={e => {
-                      if (e.target.value === '__new__') {
-                        setAddingNewStore(true)
-                        setStore('')
-                      } else {
-                        setStore(e.target.value)
-                      }
-                    }}
-                    className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 appearance-none focus:outline-none focus:ring-2 focus:ring-amber-400"
+                <div className="space-y-2">
+                  {editingStores ? (
+                    <div className="rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 overflow-hidden">
+                      {savedStores.map((s, i) => (
+                        <div key={s} className={`flex items-center justify-between px-4 py-3 ${i < savedStores.length - 1 ? 'border-b border-stone-100 dark:border-stone-700' : ''}`}>
+                          <span className="text-stone-900 dark:text-stone-100 text-sm">{s}</span>
+                          <button
+                            type="button"
+                            onClick={() => deleteStore(s)}
+                            className="p-1.5 rounded-lg text-stone-300 dark:text-stone-600 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                          >
+                            <X size={15} />
+                          </button>
+                        </div>
+                      ))}
+                      {savedStores.length === 0 && (
+                        <p className="px-4 py-3 text-sm text-stone-400 dark:text-stone-500">No stores saved</p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="relative">
+                      <select
+                        value={store}
+                        onChange={e => {
+                          if (e.target.value === '__new__') {
+                            setAddingNewStore(true)
+                            setStore('')
+                          } else {
+                            setStore(e.target.value)
+                          }
+                        }}
+                        className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 appearance-none focus:outline-none focus:ring-2 focus:ring-amber-400"
+                      >
+                        <option value="">No store</option>
+                        {savedStores.map(s => (
+                          <option key={s} value={s}>{s}</option>
+                        ))}
+                        <option value="__new__">＋ Add new store…</option>
+                      </select>
+                      <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none" />
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setEditingStores(v => !v)}
+                    className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 px-1"
                   >
-                    <option value="">No store</option>
-                    {savedStores.map(s => (
-                      <option key={s} value={s}>{s}</option>
-                    ))}
-                    <option value="__new__">＋ Add new store…</option>
-                  </select>
-                  <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none" />
+                    {editingStores ? 'Done editing' : 'Edit stores…'}
+                  </button>
                 </div>
               ) : (
                 <div className="flex gap-2">
