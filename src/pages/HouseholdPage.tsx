@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { Copy, Check, LogOut, Users, UserPlus, Hash, Pencil } from 'lucide-react'
 import { supabase, type HouseholdMember, type Household } from '../lib/supabase'
 import { createInviteCode, joinByCode, type JoinResult } from '../lib/household'
+import SpendingReport from '../components/SpendingReport'
 
 type Props = {
   householdId: string
@@ -237,6 +238,17 @@ export default function HouseholdPage({ householdId, onHouseholdChanged, dark, o
               </button>
             </div>
           )}
+        </section>
+
+        {/* Spending Report */}
+        <section className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden">
+          <div className="flex items-center gap-2 px-4 py-3 border-b border-stone-100 dark:border-stone-800">
+            <span className="text-base">📊</span>
+            <span className="text-sm font-semibold text-stone-700 dark:text-stone-300">Spending Report</span>
+          </div>
+          <div className="px-4 py-4">
+            <SpendingReport householdId={householdId} />
+          </div>
         </section>
 
         {/* Appearance */}
