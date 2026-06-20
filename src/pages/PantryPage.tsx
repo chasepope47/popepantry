@@ -51,7 +51,6 @@ export default function PantryPage({ householdId, onNavigateToShopping }: Props)
   async function deleteItem(item: PantryItem, addToShopping: boolean) {
     const { data: { user } } = await supabase.auth.getUser()
 
-    // Always log to history
     if (user) {
       const historyEntry: Omit<ItemHistory, 'id'> = {
         household_id: householdId,
@@ -108,13 +107,13 @@ export default function PantryPage({ householdId, onNavigateToShopping }: Props)
   const uncategorized = filtered.filter(i => !CATEGORIES.find(c => c.label === i.category))
 
   return (
-    <div className="flex flex-col bg-[#f8f5f0] min-h-dvh">
-      <header className="bg-white border-b border-stone-200 px-4 py-4 flex items-center justify-between sticky top-0 z-10">
+    <div className="flex flex-col bg-[#f8f5f0] dark:bg-stone-950 min-h-dvh">
+      <header className="bg-white dark:bg-stone-900 border-b border-stone-200 dark:border-stone-700 px-4 py-4 flex items-center justify-between sticky top-0 z-10">
         <div className="flex items-center gap-2">
           <span className="text-2xl">🥫</span>
-          <h1 className="text-xl font-bold text-stone-900">{householdName}</h1>
+          <h1 className="text-xl font-bold text-stone-900 dark:text-stone-100">{householdName}</h1>
         </div>
-        <button onClick={handleSignOut} className="p-2 rounded-xl hover:bg-stone-100 text-stone-500 hover:text-stone-700 transition-colors">
+        <button onClick={handleSignOut} className="p-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 transition-colors">
           <LogOut size={20} />
         </button>
       </header>
@@ -127,34 +126,34 @@ export default function PantryPage({ householdId, onNavigateToShopping }: Props)
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search pantry…"
-            className="w-full pl-10 pr-4 py-3 rounded-xl border border-stone-200 bg-white text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400"
+            className="w-full pl-10 pr-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400"
           />
         </div>
 
         {items.length > 0 && (
           <div className="grid grid-cols-3 gap-2 mb-4">
-            <div className="bg-white rounded-xl border border-stone-200 px-3 py-3">
-              <p className="text-xs text-stone-500">Items</p>
-              <p className="text-xl font-bold text-stone-900">{filtered.length}</p>
+            <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-700 px-3 py-3">
+              <p className="text-xs text-stone-500 dark:text-stone-400">Items</p>
+              <p className="text-xl font-bold text-stone-900 dark:text-stone-100">{filtered.length}</p>
             </div>
-            <div className="bg-white rounded-xl border border-stone-200 px-3 py-3">
-              <p className="text-xs text-stone-500">Units</p>
-              <p className="text-xl font-bold text-stone-900">{totalUnits}</p>
+            <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-700 px-3 py-3">
+              <p className="text-xs text-stone-500 dark:text-stone-400">Units</p>
+              <p className="text-xl font-bold text-stone-900 dark:text-stone-100">{totalUnits}</p>
             </div>
-            <div className="bg-white rounded-xl border border-stone-200 px-3 py-3">
-              <p className="text-xs text-stone-500">Value</p>
-              <p className="text-xl font-bold text-stone-900">${totalValue.toFixed(2)}</p>
+            <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-700 px-3 py-3">
+              <p className="text-xs text-stone-500 dark:text-stone-400">Value</p>
+              <p className="text-xl font-bold text-stone-900 dark:text-stone-100">${totalValue.toFixed(2)}</p>
             </div>
           </div>
         )}
 
         {expiringSoon > 0 && (
           <button onClick={onNavigateToShopping}
-            className="w-full mb-4 flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-left">
+            className="w-full mb-4 flex items-center gap-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl px-4 py-3 text-left">
             <span className="text-xl">⚠️</span>
             <div>
-              <p className="text-sm font-semibold text-red-700">{expiringSoon} item{expiringSoon > 1 ? 's' : ''} expiring or expired</p>
-              <p className="text-xs text-red-500">Tap to view shopping suggestions →</p>
+              <p className="text-sm font-semibold text-red-700 dark:text-red-400">{expiringSoon} item{expiringSoon > 1 ? 's' : ''} expiring or expired</p>
+              <p className="text-xs text-red-500 dark:text-red-500">Tap to view shopping suggestions →</p>
             </div>
           </button>
         )}
@@ -163,9 +162,9 @@ export default function PantryPage({ householdId, onNavigateToShopping }: Props)
           <div className="flex justify-center py-16 text-stone-400">Loading…</div>
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <Package size={48} className="text-stone-300 mb-4" />
-            <p className="text-stone-500 font-medium">{search ? 'No items match your search' : 'Your pantry is empty'}</p>
-            {!search && <p className="text-stone-400 text-sm mt-1">Tap + to add your first item</p>}
+            <Package size={48} className="text-stone-300 dark:text-stone-600 mb-4" />
+            <p className="text-stone-500 dark:text-stone-400 font-medium">{search ? 'No items match your search' : 'Your pantry is empty'}</p>
+            {!search && <p className="text-stone-400 dark:text-stone-500 text-sm mt-1">Tap + to add your first item</p>}
           </div>
         ) : (
           <div className="space-y-5">
@@ -173,8 +172,8 @@ export default function PantryPage({ householdId, onNavigateToShopping }: Props)
               <div key={group.label}>
                 <div className="flex items-center gap-2 mb-2 px-1">
                   <span className="text-base">{group.emoji}</span>
-                  <span className="text-sm font-semibold text-stone-600 uppercase tracking-wide">{group.label}</span>
-                  <span className="text-xs text-stone-400 ml-auto">
+                  <span className="text-sm font-semibold text-stone-600 dark:text-stone-400 uppercase tracking-wide">{group.label}</span>
+                  <span className="text-xs text-stone-400 dark:text-stone-500 ml-auto">
                     ${group.items.reduce((s, i) => s + i.price * i.quantity, 0).toFixed(2)}
                   </span>
                 </div>
@@ -191,7 +190,7 @@ export default function PantryPage({ householdId, onNavigateToShopping }: Props)
               <div>
                 <div className="flex items-center gap-2 mb-2 px-1">
                   <span className="text-base">📦</span>
-                  <span className="text-sm font-semibold text-stone-600 uppercase tracking-wide">Other</span>
+                  <span className="text-sm font-semibold text-stone-600 dark:text-stone-400 uppercase tracking-wide">Other</span>
                 </div>
                 <div className="space-y-2">
                   {uncategorized.map(item => (
@@ -242,19 +241,19 @@ function PantryItemRow({ item, onEdit, onDelete }: { item: PantryItem; onEdit: (
   const badgeClass = expirationBadgeClasses[status]
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 px-4 py-3 flex items-center gap-3">
+    <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-700 px-4 py-3 flex items-center gap-3">
       <div className="flex-1 min-w-0">
-        <p className="font-medium text-stone-900 truncate">{item.name}</p>
+        <p className="font-medium text-stone-900 dark:text-stone-100 truncate">{item.name}</p>
         <div className="flex items-center gap-2 mt-1 flex-wrap">
-          <span className="text-sm text-stone-500">Qty: <span className="font-semibold text-stone-700">{item.quantity}</span></span>
-          <span className="text-stone-300">·</span>
-          <span className="text-sm text-stone-500">${item.price.toFixed(2)}</span>
-          <span className="text-stone-300">·</span>
+          <span className="text-sm text-stone-500 dark:text-stone-400">Qty: <span className="font-semibold text-stone-700 dark:text-stone-300">{item.quantity}</span></span>
+          <span className="text-stone-300 dark:text-stone-600">·</span>
+          <span className="text-sm text-stone-500 dark:text-stone-400">${item.price.toFixed(2)}</span>
+          <span className="text-stone-300 dark:text-stone-600">·</span>
           <span className="text-sm font-semibold text-amber-600">${(item.price * item.quantity).toFixed(2)}</span>
           {item.store && (
             <>
-              <span className="text-stone-300">·</span>
-              <span className="text-xs text-stone-400">{item.store}</span>
+              <span className="text-stone-300 dark:text-stone-600">·</span>
+              <span className="text-xs text-stone-400 dark:text-stone-500">{item.store}</span>
             </>
           )}
           {label && (
@@ -262,10 +261,10 @@ function PantryItemRow({ item, onEdit, onDelete }: { item: PantryItem; onEdit: (
           )}
         </div>
       </div>
-      <button onClick={onEdit} className="p-2 rounded-xl text-stone-300 hover:text-amber-500 hover:bg-amber-50 transition-colors flex-shrink-0">
+      <button onClick={onEdit} className="p-2 rounded-xl text-stone-300 dark:text-stone-600 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors flex-shrink-0">
         <span className="text-base">✏️</span>
       </button>
-      <button onClick={onDelete} className="p-2 rounded-xl text-stone-300 hover:text-red-500 hover:bg-red-50 transition-colors flex-shrink-0">
+      <button onClick={onDelete} className="p-2 rounded-xl text-stone-300 dark:text-stone-600 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors flex-shrink-0">
         <span className="text-base">🗑</span>
       </button>
     </div>

@@ -62,36 +62,34 @@ export default function AddItemSheet({ initialValues, mode = 'add', onSave, onCl
   }
 
   return (
-    <div className="fixed inset-0 z-40 bg-[#f8f5f0] flex flex-col">
-      <div className="bg-white border-b border-stone-200 px-4 py-4 flex items-center gap-3 flex-shrink-0">
-        <button onClick={onClose} className="p-2 rounded-xl hover:bg-stone-100 text-stone-600 transition-colors">
+    <div className="fixed inset-0 z-40 bg-[#f8f5f0] dark:bg-stone-950 flex flex-col">
+      <div className="bg-white dark:bg-stone-900 border-b border-stone-200 dark:border-stone-700 px-4 py-4 flex items-center gap-3 flex-shrink-0">
+        <button onClick={onClose} className="p-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-600 dark:text-stone-400 transition-colors">
           <ArrowLeft size={22} />
         </button>
-        <h2 className="text-lg font-bold text-stone-900">
+        <h2 className="text-lg font-bold text-stone-900 dark:text-stone-100">
           {mode === 'edit' ? 'Edit Item' : 'Add Item'}
         </h2>
       </div>
 
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-lg mx-auto px-4 py-5 space-y-4">
-          {/* Scan button */}
           {mode === 'add' && (
             <button
               type="button"
               onClick={() => setScanning(true)}
-              className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl border-2 border-dashed border-amber-400 text-amber-600 font-semibold hover:bg-amber-50 transition-colors"
+              className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl border-2 border-dashed border-amber-400 text-amber-600 dark:text-amber-500 font-semibold hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors"
             >
               <Scan size={22} />
               {barcode ? `Scanned: ${barcode}` : 'Scan Barcode'}
             </button>
           )}
 
-          {looking && <p className="text-sm text-stone-500 text-center py-1">Looking up product…</p>}
+          {looking && <p className="text-sm text-stone-500 dark:text-stone-400 text-center py-1">Looking up product…</p>}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Name */}
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">
+              <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
                 Product Name <span className="text-red-400">*</span>
               </label>
               <input
@@ -100,18 +98,17 @@ export default function AddItemSheet({ initialValues, mode = 'add', onSave, onCl
                 value={name}
                 onChange={e => setName(e.target.value)}
                 placeholder="e.g. Organic Pasta"
-                className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-white text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400"
+                className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400"
               />
             </div>
 
-            {/* Category */}
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">Category</label>
+              <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Category</label>
               <div className="relative">
                 <select
                   value={category}
                   onChange={e => setCategory(e.target.value as Category)}
-                  className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-white text-stone-900 appearance-none focus:outline-none focus:ring-2 focus:ring-amber-400"
+                  className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 appearance-none focus:outline-none focus:ring-2 focus:ring-amber-400"
                 >
                   {CATEGORIES.map(c => (
                     <option key={c.label} value={c.label}>{c.emoji} {c.label}</option>
@@ -121,39 +118,36 @@ export default function AddItemSheet({ initialValues, mode = 'add', onSave, onCl
               </div>
             </div>
 
-            {/* Store */}
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">
-                Store <span className="text-stone-400 font-normal">(optional)</span>
+              <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+                Store <span className="text-stone-400 dark:text-stone-500 font-normal">(optional)</span>
               </label>
               <input
                 type="text"
                 value={store}
                 onChange={e => setStore(e.target.value)}
                 placeholder="e.g. Walmart, Costco, Target…"
-                className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-white text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400"
+                className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400"
               />
             </div>
 
-            {/* Expiration Date */}
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">
-                Expiration Date <span className="text-stone-400 font-normal">(optional)</span>
+              <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+                Expiration Date <span className="text-stone-400 dark:text-stone-500 font-normal">(optional)</span>
               </label>
               <input
                 type="date"
                 value={expirationDate ?? ''}
                 onChange={e => setExpirationDate(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-white text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-400"
+                className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-400"
               />
             </div>
 
-            {/* Quantity */}
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">Quantity</label>
+              <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Quantity</label>
               <div className="flex items-center gap-4">
                 <button type="button" onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                  className="w-12 h-12 rounded-xl bg-stone-100 flex items-center justify-center hover:bg-stone-200 transition-colors">
+                  className="w-12 h-12 rounded-xl bg-stone-100 dark:bg-stone-800 flex items-center justify-center hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors text-stone-700 dark:text-stone-300">
                   <Minus size={18} />
                 </button>
                 <input
@@ -161,7 +155,7 @@ export default function AddItemSheet({ initialValues, mode = 'add', onSave, onCl
                   min={1}
                   value={quantity}
                   onChange={e => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                  className="flex-1 text-center px-4 py-3 rounded-xl border border-stone-200 bg-white text-stone-900 font-bold text-xl focus:outline-none focus:ring-2 focus:ring-amber-400"
+                  className="flex-1 text-center px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 font-bold text-xl focus:outline-none focus:ring-2 focus:ring-amber-400"
                 />
                 <button type="button" onClick={() => setQuantity(q => q + 1)}
                   className="w-12 h-12 rounded-xl bg-amber-500 flex items-center justify-center text-white hover:bg-amber-600 transition-colors">
@@ -170,11 +164,10 @@ export default function AddItemSheet({ initialValues, mode = 'add', onSave, onCl
               </div>
             </div>
 
-            {/* Price */}
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">Price ($)</label>
+              <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Price ($)</label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 font-medium">$</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 dark:text-stone-500 font-medium">$</span>
                 <input
                   type="number"
                   min={0}
@@ -182,13 +175,13 @@ export default function AddItemSheet({ initialValues, mode = 'add', onSave, onCl
                   value={price}
                   onChange={e => setPrice(e.target.value)}
                   placeholder="0.00"
-                  className="w-full pl-8 pr-4 py-3 rounded-xl border border-stone-200 bg-white text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400"
+                  className="w-full pl-8 pr-4 py-3 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400"
                 />
               </div>
             </div>
 
             {error && (
-              <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-xl px-4 py-3">{error}</p>
+              <p className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-xl px-4 py-3">{error}</p>
             )}
 
             <button

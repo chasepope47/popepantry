@@ -70,7 +70,6 @@ export default function HouseholdPage({ householdId, onHouseholdChanged }: Props
     const result = await joinByCode(joinCode, user.id, email)
     setJoinStatus(result)
     if (result === 'ok') {
-      // Re-fetch household membership to get new household id
       const { data } = await supabase
         .from('household_members')
         .select('household_id')
@@ -85,15 +84,15 @@ export default function HouseholdPage({ householdId, onHouseholdChanged }: Props
   }
 
   const joinStatusMessages: Record<string, { text: string; color: string }> = {
-    invalid: { text: 'Code not found. Double-check and try again.', color: 'text-red-600' },
-    expired: { text: 'This invite code has expired. Ask for a new one.', color: 'text-red-600' },
-    already_member: { text: "You're already in this household.", color: 'text-amber-600' },
-    ok: { text: "You've joined! Your pantry is now synced.", color: 'text-green-600' },
+    invalid: { text: 'Code not found. Double-check and try again.', color: 'text-red-600 dark:text-red-400' },
+    expired: { text: 'This invite code has expired. Ask for a new one.', color: 'text-red-600 dark:text-red-400' },
+    already_member: { text: "You're already in this household.", color: 'text-amber-600 dark:text-amber-400' },
+    ok: { text: "You've joined! Your pantry is now synced.", color: 'text-green-600 dark:text-green-400' },
   }
 
   return (
-    <div className="flex flex-col bg-[#f8f5f0] min-h-dvh">
-      <header className="bg-white border-b border-stone-200 px-4 py-4 sticky top-0 z-10">
+    <div className="flex flex-col bg-[#f8f5f0] dark:bg-stone-950 min-h-dvh">
+      <header className="bg-white dark:bg-stone-900 border-b border-stone-200 dark:border-stone-700 px-4 py-4 sticky top-0 z-10">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 flex-1 min-w-0">
             <span className="text-2xl flex-shrink-0">🏠</span>
@@ -104,7 +103,7 @@ export default function HouseholdPage({ householdId, onHouseholdChanged }: Props
                   value={nameInput}
                   onChange={e => setNameInput(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter') saveName(); if (e.key === 'Escape') setEditingName(false) }}
-                  className="flex-1 text-xl font-bold text-stone-900 bg-stone-100 rounded-lg px-2 py-0.5 focus:outline-none focus:ring-2 focus:ring-amber-400"
+                  className="flex-1 text-xl font-bold text-stone-900 dark:text-stone-100 bg-stone-100 dark:bg-stone-800 rounded-lg px-2 py-0.5 focus:outline-none focus:ring-2 focus:ring-amber-400"
                 />
                 <button
                   onClick={saveName}
@@ -113,18 +112,18 @@ export default function HouseholdPage({ householdId, onHouseholdChanged }: Props
                 >
                   {savingName ? '…' : 'Save'}
                 </button>
-                <button onClick={() => setEditingName(false)} className="text-xs px-2 py-1.5 rounded-lg bg-stone-100 text-stone-600">
+                <button onClick={() => setEditingName(false)} className="text-xs px-2 py-1.5 rounded-lg bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400">
                   Cancel
                 </button>
               </div>
             ) : (
               <div className="flex items-center gap-2 flex-1 min-w-0">
-                <h1 className="text-xl font-bold text-stone-900 truncate">
+                <h1 className="text-xl font-bold text-stone-900 dark:text-stone-100 truncate">
                   {household?.name ?? 'My Home'}
                 </h1>
                 <button
                   onClick={() => { setNameInput(household?.name ?? ''); setEditingName(true) }}
-                  className="p-1 rounded-lg text-stone-400 hover:text-stone-600 hover:bg-stone-100 transition-colors flex-shrink-0"
+                  className="p-1 rounded-lg text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors flex-shrink-0"
                 >
                   <Pencil size={15} />
                 </button>
@@ -132,7 +131,7 @@ export default function HouseholdPage({ householdId, onHouseholdChanged }: Props
             )}
           </div>
           {!editingName && (
-            <button onClick={handleSignOut} className="p-2 rounded-xl hover:bg-stone-100 text-stone-500 transition-colors flex-shrink-0">
+            <button onClick={handleSignOut} className="p-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-500 dark:text-stone-400 transition-colors flex-shrink-0">
               <LogOut size={20} />
             </button>
           )}
@@ -142,37 +141,37 @@ export default function HouseholdPage({ householdId, onHouseholdChanged }: Props
       <main className="flex-1 px-4 py-5 max-w-lg mx-auto w-full pb-32 space-y-4">
 
         {/* Members */}
-        <section className="bg-white rounded-2xl border border-stone-200 overflow-hidden">
-          <div className="flex items-center gap-2 px-4 py-3 border-b border-stone-100">
-            <Users size={16} className="text-stone-400" />
-            <span className="text-sm font-semibold text-stone-700">Household Members</span>
-            <span className="ml-auto text-xs text-stone-400 bg-stone-100 px-2 py-0.5 rounded-full">
+        <section className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden">
+          <div className="flex items-center gap-2 px-4 py-3 border-b border-stone-100 dark:border-stone-800">
+            <Users size={16} className="text-stone-400 dark:text-stone-500" />
+            <span className="text-sm font-semibold text-stone-700 dark:text-stone-300">Household Members</span>
+            <span className="ml-auto text-xs text-stone-400 dark:text-stone-500 bg-stone-100 dark:bg-stone-800 px-2 py-0.5 rounded-full">
               {members.length}
             </span>
           </div>
           {members.map(m => (
-            <div key={m.id} className="flex items-center gap-3 px-4 py-3 border-b border-stone-50 last:border-0">
-              <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 font-bold text-sm flex-shrink-0">
+            <div key={m.id} className="flex items-center gap-3 px-4 py-3 border-b border-stone-50 dark:border-stone-800 last:border-0">
+              <div className="w-9 h-9 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center text-amber-700 dark:text-amber-400 font-bold text-sm flex-shrink-0">
                 {(m.email ?? '?')[0].toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-stone-900 truncate">{m.email ?? 'Unknown'}</p>
-                <p className="text-xs text-stone-400 capitalize">{m.role}</p>
+                <p className="text-sm font-medium text-stone-900 dark:text-stone-100 truncate">{m.email ?? 'Unknown'}</p>
+                <p className="text-xs text-stone-400 dark:text-stone-500 capitalize">{m.role}</p>
               </div>
               {m.user_id === currentUserId && (
-                <span className="text-xs text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full font-medium">You</span>
+                <span className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 px-2 py-0.5 rounded-full font-medium">You</span>
               )}
             </div>
           ))}
         </section>
 
         {/* Invite */}
-        <section className="bg-white rounded-2xl border border-stone-200 p-4">
+        <section className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
           <div className="flex items-center gap-2 mb-3">
-            <UserPlus size={16} className="text-stone-400" />
-            <span className="text-sm font-semibold text-stone-700">Invite Someone</span>
+            <UserPlus size={16} className="text-stone-400 dark:text-stone-500" />
+            <span className="text-sm font-semibold text-stone-700 dark:text-stone-300">Invite Someone</span>
           </div>
-          <p className="text-xs text-stone-500 mb-3">
+          <p className="text-xs text-stone-500 dark:text-stone-400 mb-3">
             Generate a 6-letter code and share it with your household member. They'll enter it in their app to join and sync your pantry.
           </p>
           <button
@@ -184,12 +183,12 @@ export default function HouseholdPage({ householdId, onHouseholdChanged }: Props
           </button>
 
           {inviteCode && (
-            <div className="mt-4 bg-stone-50 rounded-xl border border-stone-200 p-4 text-center">
-              <p className="text-xs text-stone-500 mb-2">Share this code — expires in 7 days</p>
-              <p className="text-4xl font-bold tracking-[0.2em] text-stone-900 mb-3">{inviteCode}</p>
+            <div className="mt-4 bg-stone-50 dark:bg-stone-800 rounded-xl border border-stone-200 dark:border-stone-700 p-4 text-center">
+              <p className="text-xs text-stone-500 dark:text-stone-400 mb-2">Share this code — expires in 7 days</p>
+              <p className="text-4xl font-bold tracking-[0.2em] text-stone-900 dark:text-stone-100 mb-3">{inviteCode}</p>
               <button
                 onClick={handleCopy}
-                className="flex items-center gap-2 mx-auto px-4 py-2 rounded-xl bg-white border border-stone-200 text-stone-700 text-sm font-medium hover:bg-stone-100 transition-colors"
+                className="flex items-center gap-2 mx-auto px-4 py-2 rounded-xl bg-white dark:bg-stone-700 border border-stone-200 dark:border-stone-600 text-stone-700 dark:text-stone-300 text-sm font-medium hover:bg-stone-100 dark:hover:bg-stone-600 transition-colors"
               >
                 {copied ? <Check size={15} className="text-green-500" /> : <Copy size={15} />}
                 {copied ? 'Copied!' : 'Copy Code'}
@@ -199,19 +198,19 @@ export default function HouseholdPage({ householdId, onHouseholdChanged }: Props
         </section>
 
         {/* Join */}
-        <section className="bg-white rounded-2xl border border-stone-200 p-4">
+        <section className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
           <button
             onClick={() => setShowJoin(v => !v)}
             className="flex items-center gap-2 w-full text-left"
           >
-            <Hash size={16} className="text-stone-400" />
-            <span className="text-sm font-semibold text-stone-700">Join a Home with a Code</span>
-            <span className="ml-auto text-stone-400 text-xs">{showJoin ? '▲' : '▼'}</span>
+            <Hash size={16} className="text-stone-400 dark:text-stone-500" />
+            <span className="text-sm font-semibold text-stone-700 dark:text-stone-300">Join a Home with a Code</span>
+            <span className="ml-auto text-stone-400 dark:text-stone-500 text-xs">{showJoin ? '▲' : '▼'}</span>
           </button>
 
           {showJoin && (
             <div className="mt-3 space-y-3">
-              <p className="text-xs text-stone-500">
+              <p className="text-xs text-stone-500 dark:text-stone-400">
                 Enter a code shared by someone already in their household.
               </p>
               <input
@@ -220,7 +219,7 @@ export default function HouseholdPage({ householdId, onHouseholdChanged }: Props
                 onChange={e => { setJoinCode(e.target.value.toUpperCase()); setJoinStatus(null) }}
                 placeholder="ABC123"
                 maxLength={6}
-                className="w-full text-center text-2xl font-bold tracking-[0.2em] px-4 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-900 placeholder-stone-300 uppercase focus:outline-none focus:ring-2 focus:ring-amber-400"
+                className="w-full text-center text-2xl font-bold tracking-[0.2em] px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder-stone-300 dark:placeholder-stone-600 uppercase focus:outline-none focus:ring-2 focus:ring-amber-400"
               />
               {joinStatus && joinStatus !== 'loading' && (
                 <p className={`text-sm text-center ${joinStatusMessages[joinStatus]?.color}`}>
@@ -230,7 +229,7 @@ export default function HouseholdPage({ householdId, onHouseholdChanged }: Props
               <button
                 onClick={handleJoin}
                 disabled={joinCode.length < 6 || joinStatus === 'loading'}
-                className="w-full py-3 rounded-xl bg-stone-900 hover:bg-stone-700 text-white font-semibold transition-colors disabled:opacity-40"
+                className="w-full py-3 rounded-xl bg-stone-900 dark:bg-stone-100 hover:bg-stone-700 dark:hover:bg-stone-200 text-white dark:text-stone-900 font-semibold transition-colors disabled:opacity-40"
               >
                 {joinStatus === 'loading' ? 'Joining…' : 'Join Household'}
               </button>

@@ -19,6 +19,7 @@ export const CATEGORIES = [
   { label: 'Snacks', emoji: '🍿' },
   { label: 'Beverages', emoji: '🥤' },
   { label: 'Condiments', emoji: '🍯' },
+  { label: 'Spices', emoji: '🧂' },
   { label: 'Baking', emoji: '🧁' },
   { label: 'Other', emoji: '📦' },
 ] as const

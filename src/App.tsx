@@ -36,18 +36,18 @@ export default function App() {
   }, [session])
 
   if (session === undefined || (session && !householdId && !householdError)) {
-    return <div className="min-h-dvh flex items-center justify-center text-stone-400">Loading…</div>
+    return <div className="min-h-dvh flex items-center justify-center text-stone-400 dark:bg-stone-950">Loading…</div>
   }
 
   if (householdError) {
     return (
-      <div className="min-h-dvh flex flex-col items-center justify-center px-6 text-center gap-4">
+      <div className="min-h-dvh flex flex-col items-center justify-center px-6 text-center gap-4 bg-[#f8f5f0] dark:bg-stone-950">
         <div className="text-4xl">⚠️</div>
-        <p className="font-semibold text-stone-800">Setup incomplete</p>
-        <p className="text-sm text-stone-500 max-w-xs">
+        <p className="font-semibold text-stone-800 dark:text-stone-100">Setup incomplete</p>
+        <p className="text-sm text-stone-500 dark:text-stone-400 max-w-xs">
           The database tables aren't set up yet. Please run the SQL setup in your Supabase SQL Editor, then reload.
         </p>
-        <p className="text-xs text-red-400 bg-red-50 px-4 py-2 rounded-xl max-w-xs break-all">{householdError}</p>
+        <p className="text-xs text-red-400 bg-red-50 dark:bg-red-900/20 px-4 py-2 rounded-xl max-w-xs break-all">{householdError}</p>
         <button onClick={() => window.location.reload()}
           className="mt-2 px-6 py-3 bg-amber-500 text-white rounded-xl font-semibold">Reload</button>
         <button onClick={() => supabase.auth.signOut()} className="text-sm text-stone-400 underline">Sign out</button>
@@ -80,12 +80,14 @@ export default function App() {
         )}
       </div>
 
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200 flex z-30">
+      <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-stone-900 border-t border-stone-200 dark:border-stone-700 flex z-30">
         {tabs.map(t => (
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className={`flex-1 flex flex-col items-center gap-1 py-2.5 transition-colors ${tab === t.id ? 'text-amber-500' : 'text-stone-400'}`}
+            className={`flex-1 flex flex-col items-center gap-1 py-2.5 transition-colors ${
+              tab === t.id ? 'text-amber-500' : 'text-stone-400 dark:text-stone-500'
+            }`}
           >
             <span className="text-xl">{t.emoji}</span>
             <span className="text-[10px] font-medium">{t.label}</span>

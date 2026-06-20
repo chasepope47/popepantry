@@ -71,7 +71,6 @@ export default function ShoppingListPage({ householdId }: Props) {
     setSuggestions([])
   }
 
-  // Group by store — items without a store go in "No Store"
   const storeGroups = suggestions.reduce<Record<string, ShoppingSuggestion[]>>((acc, s) => {
     const key = s.store?.trim() || '—'
     if (!acc[key]) acc[key] = []
@@ -79,7 +78,6 @@ export default function ShoppingListPage({ householdId }: Props) {
     return acc
   }, {})
 
-  // Sort: named stores first alphabetically, then "—"
   const sortedStores = Object.keys(storeGroups).sort((a, b) => {
     if (a === '—') return 1
     if (b === '—') return -1
@@ -87,19 +85,19 @@ export default function ShoppingListPage({ householdId }: Props) {
   })
 
   return (
-    <div className="flex flex-col bg-[#f8f5f0] min-h-dvh">
-      <header className="bg-white border-b border-stone-200 px-4 py-4 flex items-center justify-between sticky top-0 z-10">
+    <div className="flex flex-col bg-[#f8f5f0] dark:bg-stone-950 min-h-dvh">
+      <header className="bg-white dark:bg-stone-900 border-b border-stone-200 dark:border-stone-700 px-4 py-4 flex items-center justify-between sticky top-0 z-10">
         <div className="flex items-center gap-2">
           <span className="text-2xl">🛒</span>
-          <h1 className="text-xl font-bold text-stone-900">Shopping List</h1>
+          <h1 className="text-xl font-bold text-stone-900 dark:text-stone-100">Shopping List</h1>
         </div>
         <div className="flex items-center gap-2">
           <button onClick={syncExpiring} disabled={syncing}
-            className="p-2 rounded-xl hover:bg-stone-100 text-stone-500 transition-colors" title="Check for expiring items">
+            className="p-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-500 dark:text-stone-400 transition-colors" title="Check for expiring items">
             <RefreshCw size={20} className={syncing ? 'animate-spin' : ''} />
           </button>
           {suggestions.length > 0 && (
-            <button onClick={dismissAll} className="text-xs text-stone-400 hover:text-red-500 px-2 py-1 rounded-lg hover:bg-red-50 transition-colors">
+            <button onClick={dismissAll} className="text-xs text-stone-400 hover:text-red-500 px-2 py-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
               Clear all
             </button>
           )}
@@ -108,10 +106,10 @@ export default function ShoppingListPage({ householdId }: Props) {
 
       <main className="flex-1 px-4 py-4 max-w-lg mx-auto w-full pb-32">
         <div className="flex gap-3 mb-4 text-xs">
-          <span className="flex items-center gap-1 text-stone-500">
+          <span className="flex items-center gap-1 text-stone-500 dark:text-stone-400">
             <span className="w-2 h-2 rounded-full bg-red-400 inline-block" /> Expiring soon
           </span>
-          <span className="flex items-center gap-1 text-stone-500">
+          <span className="flex items-center gap-1 text-stone-500 dark:text-stone-400">
             <span className="w-2 h-2 rounded-full bg-amber-400 inline-block" /> Used up
           </span>
         </div>
@@ -120,9 +118,9 @@ export default function ShoppingListPage({ householdId }: Props) {
           <div className="flex justify-center py-16 text-stone-400">Loading…</div>
         ) : suggestions.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <ShoppingCart size={48} className="text-stone-300 mb-4" />
-            <p className="text-stone-500 font-medium">Your shopping list is empty</p>
-            <p className="text-stone-400 text-sm mt-1 max-w-xs">
+            <ShoppingCart size={48} className="text-stone-300 dark:text-stone-600 mb-4" />
+            <p className="text-stone-500 dark:text-stone-400 font-medium">Your shopping list is empty</p>
+            <p className="text-stone-400 dark:text-stone-500 text-sm mt-1 max-w-xs">
               Items appear here when you use them up or when they expire soon
             </p>
             <button onClick={syncExpiring} disabled={syncing}
@@ -137,10 +135,10 @@ export default function ShoppingListPage({ householdId }: Props) {
               <div key={store}>
                 <div className="flex items-center gap-2 mb-2 px-1">
                   <span className="text-base">🏪</span>
-                  <span className="text-sm font-semibold text-stone-600 uppercase tracking-wide">
+                  <span className="text-sm font-semibold text-stone-600 dark:text-stone-400 uppercase tracking-wide">
                     {store === '—' ? 'No Store' : store}
                   </span>
-                  <span className="ml-auto text-xs text-stone-400">
+                  <span className="ml-auto text-xs text-stone-400 dark:text-stone-500">
                     {storeGroups[store].length} item{storeGroups[store].length !== 1 ? 's' : ''}
                   </span>
                 </div>
@@ -160,17 +158,17 @@ export default function ShoppingListPage({ householdId }: Props) {
 
 function SuggestionRow({ suggestion, onDismiss }: { suggestion: ShoppingSuggestion; onDismiss: () => void }) {
   return (
-    <div className="bg-white rounded-xl border border-stone-200 px-4 py-3 flex items-center gap-3">
+    <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-700 px-4 py-3 flex items-center gap-3">
       <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${suggestion.reason === 'expiring_soon' ? 'bg-red-400' : 'bg-amber-400'}`} />
       <div className="flex-1 min-w-0">
-        <p className="font-medium text-stone-900 truncate">{suggestion.name}</p>
-        <p className="text-xs text-stone-400 mt-0.5">
+        <p className="font-medium text-stone-900 dark:text-stone-100 truncate">{suggestion.name}</p>
+        <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">
           {suggestion.category && <span>{suggestion.category} · </span>}
           {suggestion.reason === 'expiring_soon' ? 'Expiring soon' : 'Used up'}
           {suggestion.last_price ? ` · $${suggestion.last_price.toFixed(2)}` : ''}
         </p>
       </div>
-      <button onClick={onDismiss} className="p-2 rounded-xl text-stone-300 hover:text-red-500 hover:bg-red-50 transition-colors flex-shrink-0">
+      <button onClick={onDismiss} className="p-2 rounded-xl text-stone-300 dark:text-stone-600 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors flex-shrink-0">
         <Trash2 size={16} />
       </button>
     </div>
