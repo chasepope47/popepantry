@@ -91,6 +91,37 @@ export default function PantryPage({ householdId, onNavigateToShopping }: Props)
     await supabase.auth.signOut()
   }
 
+  async function syncExpiringAndNavigate() {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      const expiring = items.filter(i => {
+        const s = getExpirationStatus(i.expiration_date)
+        return s === 'critical' || s === 'expired'
+      })
+      for (const item of expiring) {
+        const { data: existing } = await supabase
+          .from('shopping_suggestions')
+          .select('id')
+          .eq('household_id', householdId)
+          .eq('name', item.name)
+          .eq('reason', 'expiring_soon')
+          .limit(1)
+        if (!existing || existing.length === 0) {
+          await supabase.from('shopping_suggestions').insert({
+            user_id: user.id,
+            household_id: householdId,
+            name: item.name,
+            category: item.category,
+            store: item.store,
+            last_price: item.price,
+            reason: 'expiring_soon',
+          })
+        }
+      }
+    }
+    onNavigateToShopping()
+  }
+
   const filtered = items.filter(i => i.name.toLowerCase().includes(search.toLowerCase()))
   const totalValue = filtered.reduce((sum, i) => sum + i.price * i.quantity, 0)
   const totalUnits = filtered.reduce((s, i) => s + i.quantity, 0)
@@ -148,7 +179,7 @@ export default function PantryPage({ householdId, onNavigateToShopping }: Props)
         )}
 
         {expiringSoon > 0 && (
-          <button onClick={onNavigateToShopping}
+          <button onClick={syncExpiringAndNavigate}
             className="w-full mb-4 flex items-center gap-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl px-4 py-3 text-left">
             <span className="text-xl">⚠️</span>
             <div>
