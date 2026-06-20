@@ -11,12 +11,10 @@ const CONTAINER_ID = 'barcode-scanner-container'
 
 export default function BarcodeScanner({ onScan, onClose }: Props) {
   const [error, setError] = useState<string | null>(null)
-  const [scanning, setScanning] = useState(false)
-  // Keep latest callbacks in refs so the effect never needs to re-run
+  const [cameraReady, setCameraReady] = useState(false)
+  const [found, setFound] = useState(false)
   const onScanRef = useRef(onScan)
-  const onCloseRef = useRef(onClose)
   onScanRef.current = onScan
-  onCloseRef.current = onClose
 
   useEffect(() => {
     let destroyed = false
@@ -25,21 +23,19 @@ export default function BarcodeScanner({ onScan, onClose }: Props) {
     scanner
       .start(
         { facingMode: 'environment' },
-        {
-          fps: 15,
-          // Wide box is better for 1D grocery barcodes (EAN-13, UPC-A)
-          qrbox: { width: 280, height: 120 },
-          aspectRatio: 1.7778,
-        },
+        { fps: 15, qrbox: { width: 280, height: 120 }, aspectRatio: 1.7778 },
         (code) => {
           if (destroyed) return
           destroyed = true
-          onScanRef.current(code) // call immediately so the UI transitions right away
+          setFound(true)
           scanner.stop().catch(() => {})
+          // Wait for the success screen to render before transitioning
+          // This prevents touch events from the scan from hitting the form backdrop
+          setTimeout(() => onScanRef.current(code), 400)
         },
-        () => {} // suppress per-frame decode errors
+        () => {}
       )
-      .then(() => { if (!destroyed) setScanning(true) })
+      .then(() => { if (!destroyed) setCameraReady(true) })
       .catch((err: unknown) => {
         const msg = String(err).toLowerCase()
         if (msg.includes('permission') || msg.includes('notallowed')) {
@@ -55,19 +51,32 @@ export default function BarcodeScanner({ onScan, onClose }: Props) {
       destroyed = true
       scanner.stop().catch(() => {})
     }
-  }, []) // intentionally empty — callbacks are accessed via refs
+  }, [])
 
-  return (
-    <div className="fixed inset-0 z-50 bg-black flex flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-4 text-white">
-        <span className="font-semibold text-lg">Scan Barcode</span>
-        <button onClick={onClose} className="p-2 rounded-full hover:bg-white/10 active:bg-white/20">
-          <X size={24} />
-        </button>
+  // Success screen — shown briefly after scan before transitioning to form
+  if (found) {
+    return (
+      <div className="fixed inset-0 z-50 bg-black flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-20 h-20 rounded-full bg-green-500 flex items-center justify-center mx-auto mb-4">
+            <span className="text-4xl">✓</span>
+          </div>
+          <p className="text-white font-semibold text-lg">Barcode found!</p>
+          <p className="text-white/50 text-sm mt-1">Looking up product…</p>
+        </div>
       </div>
+    )
+  }
 
-      {error ? (
+  if (error) {
+    return (
+      <div className="fixed inset-0 z-50 bg-black flex flex-col">
+        <div className="flex items-center justify-between px-4 py-4 text-white">
+          <span className="font-semibold text-lg">Scan Barcode</span>
+          <button onClick={onClose} className="p-2 rounded-full hover:bg-white/10">
+            <X size={24} />
+          </button>
+        </div>
         <div className="flex-1 flex items-center justify-center px-8 text-center">
           <div>
             <div className="text-5xl mb-4">📷</div>
@@ -80,23 +89,29 @@ export default function BarcodeScanner({ onScan, onClose }: Props) {
             </button>
           </div>
         </div>
-      ) : (
-        <div className="flex-1 flex flex-col items-center justify-center relative">
-          {/* Scanner element */}
-          <div id={CONTAINER_ID} className="w-full max-w-sm overflow-hidden rounded-xl" />
+      </div>
+    )
+  }
 
-          {/* Aim guide overlay */}
-          {scanning && (
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="border-2 border-amber-400 rounded-lg w-72 h-28 opacity-60" />
-            </div>
-          )}
-
-          <p className="text-white/60 text-sm mt-8 px-8 text-center">
-            Line up the barcode inside the box
-          </p>
-        </div>
-      )}
+  return (
+    <div className="fixed inset-0 z-50 bg-black flex flex-col">
+      <div className="flex items-center justify-between px-4 py-4 text-white">
+        <span className="font-semibold text-lg">Scan Barcode</span>
+        <button onClick={onClose} className="p-2 rounded-full hover:bg-white/10 active:bg-white/20">
+          <X size={24} />
+        </button>
+      </div>
+      <div className="flex-1 flex flex-col items-center justify-center relative">
+        <div id={CONTAINER_ID} className="w-full max-w-sm overflow-hidden rounded-xl" />
+        {cameraReady && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="border-2 border-amber-400 rounded-lg w-72 h-28 opacity-70" />
+          </div>
+        )}
+        <p className="text-white/60 text-sm mt-8 px-8 text-center">
+          Line up the barcode inside the box
+        </p>
+      </div>
     </div>
   )
 }
