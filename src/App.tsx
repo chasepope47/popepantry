@@ -12,6 +12,7 @@ type Tab = 'pantry' | 'shopping' | 'home'
 export default function App() {
   const [session, setSession] = useState<Session | null | undefined>(undefined)
   const [householdId, setHouseholdId] = useState<string | null>(null)
+  const [householdError, setHouseholdError] = useState<string | null>(null)
   const [tab, setTab] = useState<Tab>('pantry')
 
   useEffect(() => {
@@ -23,16 +24,45 @@ export default function App() {
   }, [])
 
   useEffect(() => {
-    if (!session?.user) { setHouseholdId(null); return }
+    if (!session?.user) { setHouseholdId(null); setHouseholdError(null); return }
+    setHouseholdError(null)
     ensureHousehold(session.user.id, session.user.email ?? '')
       .then(setHouseholdId)
-      .catch(console.error)
+      .catch((err) => {
+        console.error(err)
+        setHouseholdError(err?.message ?? 'Failed to load household')
+      })
   }, [session])
 
-  if (session === undefined || (session && !householdId)) {
+  if (session === undefined || (session && !householdId && !householdError)) {
     return (
       <div className="min-h-dvh flex items-center justify-center text-stone-400">
         Loading…
+      </div>
+    )
+  }
+
+  if (householdError) {
+    return (
+      <div className="min-h-dvh flex flex-col items-center justify-center px-6 text-center gap-4">
+        <div className="text-4xl">⚠️</div>
+        <p className="font-semibold text-stone-800">Setup incomplete</p>
+        <p className="text-sm text-stone-500 max-w-xs">
+          The database tables aren't set up yet. Please run the SQL setup in your Supabase SQL Editor, then reload.
+        </p>
+        <p className="text-xs text-red-400 bg-red-50 px-4 py-2 rounded-xl max-w-xs break-all">{householdError}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="mt-2 px-6 py-3 bg-amber-500 text-white rounded-xl font-semibold"
+        >
+          Reload
+        </button>
+        <button
+          onClick={() => supabase.auth.signOut()}
+          className="text-sm text-stone-400 underline"
+        >
+          Sign out
+        </button>
       </div>
     )
   }
