@@ -5,9 +5,10 @@ import type { Session } from '@supabase/supabase-js'
 import AuthPage from './pages/AuthPage'
 import PantryPage from './pages/PantryPage'
 import ShoppingListPage from './pages/ShoppingListPage'
+import HistoryPage from './pages/HistoryPage'
 import HouseholdPage from './pages/HouseholdPage'
 
-type Tab = 'pantry' | 'shopping' | 'home'
+type Tab = 'pantry' | 'shopping' | 'history' | 'home'
 
 export default function App() {
   const [session, setSession] = useState<Session | null | undefined>(undefined)
@@ -35,11 +36,7 @@ export default function App() {
   }, [session])
 
   if (session === undefined || (session && !householdId && !householdError)) {
-    return (
-      <div className="min-h-dvh flex items-center justify-center text-stone-400">
-        Loading…
-      </div>
-    )
+    return <div className="min-h-dvh flex items-center justify-center text-stone-400">Loading…</div>
   }
 
   if (householdError) {
@@ -51,34 +48,30 @@ export default function App() {
           The database tables aren't set up yet. Please run the SQL setup in your Supabase SQL Editor, then reload.
         </p>
         <p className="text-xs text-red-400 bg-red-50 px-4 py-2 rounded-xl max-w-xs break-all">{householdError}</p>
-        <button
-          onClick={() => window.location.reload()}
-          className="mt-2 px-6 py-3 bg-amber-500 text-white rounded-xl font-semibold"
-        >
-          Reload
-        </button>
-        <button
-          onClick={() => supabase.auth.signOut()}
-          className="text-sm text-stone-400 underline"
-        >
-          Sign out
-        </button>
+        <button onClick={() => window.location.reload()}
+          className="mt-2 px-6 py-3 bg-amber-500 text-white rounded-xl font-semibold">Reload</button>
+        <button onClick={() => supabase.auth.signOut()} className="text-sm text-stone-400 underline">Sign out</button>
       </div>
     )
   }
 
   if (!session) return <AuthPage />
 
+  const tabs: { id: Tab; emoji: string; label: string }[] = [
+    { id: 'pantry', emoji: '🥫', label: 'Pantry' },
+    { id: 'shopping', emoji: '🛒', label: 'Shopping' },
+    { id: 'history', emoji: '🕐', label: 'History' },
+    { id: 'home', emoji: '🏠', label: 'Home' },
+  ]
+
   return (
     <div className="flex flex-col min-h-dvh">
       <div className="flex-1">
         {tab === 'pantry' && (
-          <PantryPage
-            householdId={householdId!}
-            onNavigateToShopping={() => setTab('shopping')}
-          />
+          <PantryPage householdId={householdId!} onNavigateToShopping={() => setTab('shopping')} />
         )}
         {tab === 'shopping' && <ShoppingListPage householdId={householdId!} />}
+        {tab === 'history' && <HistoryPage householdId={householdId!} />}
         {tab === 'home' && (
           <HouseholdPage
             householdId={householdId!}
@@ -87,29 +80,17 @@ export default function App() {
         )}
       </div>
 
-      {/* Bottom tab bar */}
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200 flex z-30">
-        <button
-          onClick={() => setTab('pantry')}
-          className={`flex-1 flex flex-col items-center gap-1 py-3 transition-colors ${tab === 'pantry' ? 'text-amber-500' : 'text-stone-400'}`}
-        >
-          <span className="text-xl">🥫</span>
-          <span className="text-xs font-medium">Pantry</span>
-        </button>
-        <button
-          onClick={() => setTab('shopping')}
-          className={`flex-1 flex flex-col items-center gap-1 py-3 transition-colors ${tab === 'shopping' ? 'text-amber-500' : 'text-stone-400'}`}
-        >
-          <span className="text-xl">🛒</span>
-          <span className="text-xs font-medium">Shopping</span>
-        </button>
-        <button
-          onClick={() => setTab('home')}
-          className={`flex-1 flex flex-col items-center gap-1 py-3 transition-colors ${tab === 'home' ? 'text-amber-500' : 'text-stone-400'}`}
-        >
-          <span className="text-xl">🏠</span>
-          <span className="text-xs font-medium">Home</span>
-        </button>
+        {tabs.map(t => (
+          <button
+            key={t.id}
+            onClick={() => setTab(t.id)}
+            className={`flex-1 flex flex-col items-center gap-1 py-2.5 transition-colors ${tab === t.id ? 'text-amber-500' : 'text-stone-400'}`}
+          >
+            <span className="text-xl">{t.emoji}</span>
+            <span className="text-[10px] font-medium">{t.label}</span>
+          </button>
+        ))}
       </nav>
     </div>
   )

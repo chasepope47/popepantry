@@ -34,6 +34,7 @@ export type PantryItem = {
   quantity: number
   price: number
   category: Category
+  store: string | null
   expiration_date: string | null
   created_at: string
 }
@@ -44,9 +45,25 @@ export type ShoppingSuggestion = {
   household_id: string
   name: string
   category: Category | null
+  store: string | null
   last_price: number | null
   reason: 'expiring_soon' | 'used_up'
   created_at: string
+}
+
+export type ItemHistory = {
+  id: string
+  household_id: string
+  user_id: string
+  name: string
+  category: string | null
+  store: string | null
+  quantity: number | null
+  price: number | null
+  barcode: string | null
+  expiration_date: string | null
+  reason: 'used_up' | 'removed'
+  deleted_at: string
 }
 
 export type Household = {
