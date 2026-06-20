@@ -10,11 +10,27 @@ import HouseholdPage from './pages/HouseholdPage'
 
 type Tab = 'pantry' | 'shopping' | 'history' | 'home'
 
+function useDarkMode() {
+  const [dark, setDark] = useState(() => {
+    const saved = localStorage.getItem('theme')
+    if (saved) return saved === 'dark'
+    return window.matchMedia('(prefers-color-scheme: dark)').matches
+  })
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', dark)
+    localStorage.setItem('theme', dark ? 'dark' : 'light')
+  }, [dark])
+
+  return [dark, () => setDark(d => !d)] as const
+}
+
 export default function App() {
   const [session, setSession] = useState<Session | null | undefined>(undefined)
   const [householdId, setHouseholdId] = useState<string | null>(null)
   const [householdError, setHouseholdError] = useState<string | null>(null)
   const [tab, setTab] = useState<Tab>('pantry')
+  const [dark, toggleDark] = useDarkMode()
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session))
@@ -93,6 +109,14 @@ export default function App() {
             <span className="text-[10px] font-medium">{t.label}</span>
           </button>
         ))}
+        <button
+          onClick={toggleDark}
+          className="flex flex-col items-center gap-1 py-2.5 px-4 text-stone-400 dark:text-stone-500 transition-colors"
+          aria-label="Toggle dark mode"
+        >
+          <span className="text-xl">{dark ? '☀️' : '🌙'}</span>
+          <span className="text-[10px] font-medium">{dark ? 'Light' : 'Dark'}</span>
+        </button>
       </nav>
     </div>
   )
