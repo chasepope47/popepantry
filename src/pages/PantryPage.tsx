@@ -19,6 +19,7 @@ export default function PantryPage({ householdId, onNavigateToShopping }: Props)
   const [showAdd, setShowAdd] = useState(false)
   const [editingItem, setEditingItem] = useState<PantryItem | null>(null)
   const [search, setSearch] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [pendingDelete, setPendingDelete] = useState<PantryItem | null>(null)
 
   const fetchItems = useCallback(async () => {
@@ -122,7 +123,14 @@ export default function PantryPage({ householdId, onNavigateToShopping }: Props)
     onNavigateToShopping()
   }
 
-  const filtered = items.filter(i => i.name.toLowerCase().includes(search.toLowerCase()))
+  const searchFiltered = items.filter(i => i.name.toLowerCase().includes(search.toLowerCase()))
+  const filtered = selectedCategory
+    ? searchFiltered.filter(i => i.category === selectedCategory)
+    : searchFiltered
+
+  // Only show chips for categories that have at least one item matching the search
+  const activeCategories = CATEGORIES.filter(cat => searchFiltered.some(i => i.category === cat.label))
+
   const totalValue = filtered.reduce((sum, i) => sum + i.price * i.quantity, 0)
   const totalUnits = filtered.reduce((s, i) => s + i.quantity, 0)
   const expiringSoon = filtered.filter(i => {
@@ -150,7 +158,7 @@ export default function PantryPage({ householdId, onNavigateToShopping }: Props)
       </header>
 
       <main className="flex-1 px-4 py-4 max-w-lg mx-auto w-full pb-32">
-        <div className="relative mb-4">
+        <div className="relative mb-3">
           <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
           <input
             type="text"
@@ -160,6 +168,36 @@ export default function PantryPage({ householdId, onNavigateToShopping }: Props)
             className="w-full pl-10 pr-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400"
           />
         </div>
+
+        {/* Category filter chips */}
+        {activeCategories.length > 0 && (
+          <div className="flex gap-2 overflow-x-auto pb-1 mb-3 -mx-4 px-4 scrollbar-hide">
+            <button
+              onClick={() => setSelectedCategory(null)}
+              className={`flex-shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                selectedCategory === null
+                  ? 'bg-amber-500 text-white'
+                  : 'bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 border border-stone-200 dark:border-stone-700'
+              }`}
+            >
+              All
+            </button>
+            {activeCategories.map(cat => (
+              <button
+                key={cat.label}
+                onClick={() => setSelectedCategory(selectedCategory === cat.label ? null : cat.label)}
+                className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  selectedCategory === cat.label
+                    ? 'bg-amber-500 text-white'
+                    : 'bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 border border-stone-200 dark:border-stone-700'
+                }`}
+              >
+                <span>{cat.emoji}</span>
+                <span>{cat.label}</span>
+              </button>
+            ))}
+          </div>
+        )}
 
         {items.length > 0 && (
           <div className="grid grid-cols-3 gap-2 mb-4">
@@ -194,8 +232,15 @@ export default function PantryPage({ householdId, onNavigateToShopping }: Props)
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <Package size={48} className="text-stone-300 dark:text-stone-600 mb-4" />
-            <p className="text-stone-500 dark:text-stone-400 font-medium">{search ? 'No items match your search' : 'Your pantry is empty'}</p>
-            {!search && <p className="text-stone-400 dark:text-stone-500 text-sm mt-1">Tap + to add your first item</p>}
+            <p className="text-stone-500 dark:text-stone-400 font-medium">
+              {search || selectedCategory ? 'No items match your filters' : 'Your pantry is empty'}
+            </p>
+            {!search && !selectedCategory && <p className="text-stone-400 dark:text-stone-500 text-sm mt-1">Tap + to add your first item</p>}
+            {selectedCategory && (
+              <button onClick={() => setSelectedCategory(null)} className="mt-3 text-sm text-amber-500 font-medium">
+                Clear category filter
+              </button>
+            )}
           </div>
         ) : (
           <div className="space-y-5">
